@@ -1,0 +1,14 @@
+{
+	"name": "kmelve/craftcpintercom",
+	"description": "Enable Intercom in the Control Panel",
+	"type": "craft-plugin",
+	"authors": [
+		{
+			"name": "Knut Melvær",
+			"homepage": "https://github.com/kmelve"
+		}
+	],
+	"require": {
+		"composer/installers": "~1.0"
+	}
+}

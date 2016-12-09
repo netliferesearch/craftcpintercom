@@ -1,0 +1,26 @@
+{#
+/**
+ * Craft CP Intercom plugin for Craft CMS
+ *
+ * Craft CP Intercom Settings.twig
+ *
+ * @author    Knut Melvær
+ * @copyright Copyright (c) 2016 Knut Melvær
+ * @link      https://github.com/kmelve
+ * @package   CraftCpIntercom
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{% includeCssResource "craftcpintercom/css/CraftCpIntercom_Style.css" %}
+{% includeJsResource "craftcpintercom/js/CraftCpIntercom_Script.js" %}
+
+{{ forms.textField({
+    label: 'Some Setting',
+    instructions: 'Enter some setting here.',
+    id: 'someSetting',
+    name: 'someSetting', 
+    value: settings['someSetting']})
+}}
