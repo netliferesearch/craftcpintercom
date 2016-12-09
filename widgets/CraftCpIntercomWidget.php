@@ -62,7 +62,7 @@ class CraftCpIntercomWidget extends BaseWidget
     protected function defineSettings()
     {
         return array(
-            'someSetting' => array(AttributeType::String, 'label' => 'Some Setting', 'default' => ''),
+            'intercomId' => array(AttributeType::String, 'label' => 'Intercom Id', 'default' => ''),
         );
     }
     /**
