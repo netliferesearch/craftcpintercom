@@ -43,7 +43,7 @@ class CraftCpIntercomPlugin extends BasePlugin
     {
       if (craft()->userSession->isLoggedIn()) {
         $intercomId = $this->settings['intercomId'];
-        $supportProperty = $this->settings['supportProperty'];
+        $company = $this->settings['company'];
         $name = craft()->userSession->name;
         $email = craft()->userSession->getUser()->email;
         $javascript = "
