@@ -26,6 +26,14 @@
 }}
 
 {{ forms.textField({
+    label: 'Intercom Secret Hash',
+    instructions: 'Secret hash for secure mode',
+    id: 'hash',
+    name: 'hash',
+    value: settings['hash']})
+}}
+
+{{ forms.textField({
     label: 'Intercom Support Property',
     instructions: 'Identify which property (e.g. client, firm etc) intercom dialogues should be tagged with',
     id: 'company',

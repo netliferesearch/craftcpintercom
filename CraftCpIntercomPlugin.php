@@ -4,15 +4,6 @@
  *
  * Enable Intercom in the Control Panel
  *
- * --snip--
- * Craft plugins are very much like little applications in and of themselves. We’ve made it as simple as we can,
- * but the training wheels are off. A little prior knowledge is going to be required to write a plugin.
- *
- * For the purposes of the plugin docs, we’re going to assume that you know PHP and SQL, as well as some semi-
- * advanced concepts like object-oriented programming and PHP namespaces.
- *
- * https://craftcms.com/docs/plugins/introduction
- * --snip--
  *
  * @author    Knut Melvær
  * @copyright Copyright (c) 2016 Knut Melvær
@@ -44,13 +35,16 @@ class CraftCpIntercomPlugin extends BasePlugin
       if (craft()->userSession->isLoggedIn()) {
         $intercomId = $this->settings['intercomId'];
         $company = $this->settings['company'];
-        $name = craft()->userSession->name;
+        $hash = $this->settings['hash'];
         $email = craft()->userSession->getUser()->email;
+        $emailHash = hash_hmac('sha256', $email, $hash);
+        $name = craft()->userSession->name;
         $javascript = "
           window.intercomSettings = {
               app_id: '{$intercomId}',
               name: '{$name}',
               email: '{$email}',
+              user_hash: '{$emailHash}',
               company_id: '{$company}'
             };
             (function(){var w=window;var ic=w.Intercom;if(typeof ic==='function'){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/puws8gsr';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})()";
@@ -169,6 +163,7 @@ class CraftCpIntercomPlugin extends BasePlugin
      */
     public function onAfterInstall()
     {
+
     }
 
     /**
@@ -196,7 +191,8 @@ class CraftCpIntercomPlugin extends BasePlugin
     {
         return array(
             'intercomId' => array(AttributeType::String, 'label' => 'Intercom ID', 'default' => ''),
-            'company' => array(AttributeType::String, 'label' => 'Intercom Company Id', 'default' => 'Netlife Research')
+            'company' => array(AttributeType::String, 'label' => 'Intercom Company Id', 'default' => 'Netlife Research'),
+            'hash' => array(AttributeType::String, 'label' => 'Intecom Secret Hash', 'default' => '')
         );
     }
 
@@ -222,7 +218,6 @@ class CraftCpIntercomPlugin extends BasePlugin
      */
     public function prepSettings($settings)
     {
-        // Modify $settings here...
 
         return $settings;
     }
