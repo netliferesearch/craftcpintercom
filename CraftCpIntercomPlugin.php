@@ -17,38 +17,42 @@ namespace Craft;
 class CraftCpIntercomPlugin extends BasePlugin
 {
     /**
-     * Called after the plugin class is instantiated; do any one-time initialization here such as hooks and events:
-     *
-     * craft()->on('entries.saveEntry', function(Event $event) {
-     *    // ...
-     * });
-     *
-     * or loading any third party Composer packages via:
-     *
-     * require_once __DIR__ . '/vendor/autoload.php';
-     *
      * @return mixed
      */
-     
+
     public function init()
     {
+      /* Only run for logged in users */
       if (craft()->userSession->isLoggedIn()) {
+
+        /* Get settings */
         $intercomId = $this->settings['intercomId'];
         $company = $this->settings['company'];
+        $name = craft()->userSession->name;
         $hash = $this->settings['hash'];
         $email = craft()->userSession->getUser()->email;
-        $emailHash = hash_hmac('sha256', $email, $hash);
-        $name = craft()->userSession->name;
+
+        /* Support secure_mode */
+        if ($hash) {
+          $emailHash = hash_hmac('sha256', $email, $hash);
+        }
+        $emailHashParam = isset($emailHash) ? "\n\tuser_hash: '{$emailHash}'," : null;
+
+        /* Build JavaScript */
         $javascript = "
           window.intercomSettings = {
               app_id: '{$intercomId}',
               name: '{$name}',
-              email: '{$email}',
-              user_hash: '{$emailHash}',
+              email: '{$email}',{$emailHashParam}
               company_id: '{$company}'
             };
             (function(){var w=window;var ic=w.Intercom;if(typeof ic==='function'){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/puws8gsr';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})()";
-          craft()->templates->includeJs($javascript);
+
+          /* Include JavaScript */
+          if ($intercomId) {
+            craft()->templates->includeJs($javascript);
+          }
+
       }
     }
 
@@ -81,7 +85,7 @@ class CraftCpIntercomPlugin extends BasePlugin
      */
     public function getDocumentationUrl()
     {
-        return 'https://github.com/kmelve/craftcpintercom/blob/master/README.md';
+        return 'https://github.com/netliferesearch/craftcpintercom/blob/master/README.md';
     }
 
     /**
@@ -93,7 +97,7 @@ class CraftCpIntercomPlugin extends BasePlugin
      */
     public function getReleaseFeedUrl()
     {
-        return 'https://raw.githubusercontent.com/kmelve/craftcpintercom/master/releases.json';
+        return 'https://raw.githubusercontent.com/netliferesearch/craftcpintercom/master/releases.json';
     }
 
     /**
@@ -190,8 +194,8 @@ class CraftCpIntercomPlugin extends BasePlugin
     protected function defineSettings()
     {
         return array(
-            'intercomId' => array(AttributeType::String, 'label' => 'Intercom ID', 'default' => ''),
-            'company' => array(AttributeType::String, 'label' => 'Intercom Company Id', 'default' => 'Netlife Research'),
+            'intercomId' => array(AttributeType::String, 'label' => 'Intercom App ID', 'default' => ''),
+            'company' => array(AttributeType::String, 'label' => 'Intercom Company Id', 'default' => 'A Company'),
             'hash' => array(AttributeType::String, 'label' => 'Intecom Secret Hash', 'default' => '')
         );
     }
