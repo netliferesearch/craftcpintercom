@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2016 Knut Melvær
  * @link      https://github.com/kmelve
  * @package   CraftCpIntercom
- * @since     1.0.0
+ * @since     1.0.1
  */
 #}
 
@@ -27,11 +27,56 @@
 
 {{ forms.textField({
     label: 'Intercom Secret Hash',
-    instructions: 'Secret hash for secure mode',
+    instructions: 'Secret hash for secure mode. This is found in the intercom settings.',
     id: 'hash',
     name: 'hash',
     value: settings['hash']})
 }}
+
+<div class="field">
+
+  {% set userGroups = craft.userGroups.getAllGroups() %}
+  {% set groupOptions = [] %}
+  {% for group in userGroups %}
+  {% set option = {
+      (group.handle): group.name
+      } %}
+  {% set groupOptions = groupOptions|merge(option) %}
+  {% endfor %}
+</div>
+
+<div class="field">
+  <div class="heading">
+      <label>{{ "User group settings" | t }}</label>
+      <div class="instructions">
+          <p>{{ "Which user groups should have access to support?" | t }}</p>
+      </div>
+  </div>
+{{ forms.checkboxGroup({
+  label: "User group settings" | t,
+  instructions: 'Which user groups should have access to support?' | t,
+  id: 'userGroups',
+  name: 'userGroups',
+  options: groupOptions,
+  values: settings.userGroups ?? []
+}) }}
+</div>
+
+<div class="field">
+  <div class="heading">
+    <label>Restrict Intercom Chat to Control Panel?</label>
+    <div class="instructions">
+      <p>{{ "If you turn this off, Intercom will be available for logged in users on the website."|t }}</p>
+    </div>
+  </div>
+{{ forms.checkboxField({
+	label: "Only show in Control Panel"|t,
+
+	id: 'controlPanel',
+	name: 'controlPanel',
+	checked: settings.controlPanel
+}) }}
+</div>
 
 {{ forms.textField({
     label: 'Intercom Support Property',

@@ -43,7 +43,7 @@ Once you have set it up with the Intercom App ID, the widget will appear on the 
 
 ## Craft CP Intercom Changelog
 
-### 1.0.0 -- 2016.12.09
+### 1.0.1 -- 2016.12.09
 
 * Initial release
 

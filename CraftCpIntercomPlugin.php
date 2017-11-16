@@ -9,7 +9,7 @@
  * @copyright Copyright (c) 2016 Knut Melvær
  * @link      https://github.com/kmelve
  * @package   CraftCpIntercom
- * @since     1.0.0
+ * @since     1.0.1
  */
 
 namespace Craft;
@@ -30,8 +30,19 @@ class CraftCpIntercomPlugin extends BasePlugin
         $company = $this->settings['company'];
         $name = craft()->userSession->name;
         $hash = $this->settings['hash'];
-        $email = craft()->userSession->getUser()->email;
-
+        $userGroupOptions = $this->settings['userGroups'] ? $this->settings['userGroups'] : [];
+        $user =  craft()->userSession->getUser();
+        $email = $user->email;
+        $userGroups = [];
+        foreach ($user->groups as $group) {
+          array_push($userGroups, $group->handle);
+        }
+        /**
+         *  Check if user is in a group that is checked for support.
+         *  Admins will always have access.
+         *  */
+        $showIntercomForUser = !$user->admin ? count(array_intersect($userGroups, $userGroupOptions)) !== 0 : true;
+        $showIntercomOnFrontend = $this->settings['controlPanel'] ? craft()->request->isCpRequest() : true;
         /* Support secure_mode */
         if ($hash) {
           $emailHash = hash_hmac('sha256', $email, $hash);
@@ -49,10 +60,9 @@ class CraftCpIntercomPlugin extends BasePlugin
             (function(){var w=window;var ic=w.Intercom;if(typeof ic==='function'){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/puws8gsr';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})()";
 
           /* Include JavaScript */
-          if ($intercomId) {
-            craft()->templates->includeJs($javascript);
+          if ($intercomId && $showIntercomForUser && $showIntercomOnFrontend) {
+              craft()->templates->includeJs($javascript);
           }
-
       }
     }
 
@@ -107,7 +117,7 @@ class CraftCpIntercomPlugin extends BasePlugin
      */
     public function getVersion()
     {
-        return '1.0.0';
+        return '1.0.1';
     }
 
     /**
@@ -120,7 +130,7 @@ class CraftCpIntercomPlugin extends BasePlugin
      */
     public function getSchemaVersion()
     {
-        return '1.0.0';
+        return '1.0.1';
     }
 
     /**
@@ -193,11 +203,23 @@ class CraftCpIntercomPlugin extends BasePlugin
      */
     protected function defineSettings()
     {
-        return array(
-            'intercomId' => array(AttributeType::String, 'label' => 'Intercom App ID', 'default' => ''),
-            'company' => array(AttributeType::String, 'label' => 'Intercom Company Id', 'default' => 'A Company'),
-            'hash' => array(AttributeType::String, 'label' => 'Intecom Secret Hash', 'default' => '')
+      $userGroups = craft()->userGroups->getAllGroups();
+      $userGroupOptions = [];
+      foreach ($userGroups as $group) {
+        $userGroupOptions += array(
+          $group->handle => 1
         );
+      }
+      // echo '<pre>';
+      // var_dump($userGroupOptions);
+      // die();
+      return array(
+          'intercomId' => array(AttributeType::String, 'label' => 'Intercom App ID', 'default' => ''),
+          'company' => array(AttributeType::String, 'label' => 'Intercom Company Id', 'default' => 'A Company'),
+          'hash' => array(AttributeType::String, 'label' => 'Intecom Secret Hash', 'default' => ''),
+          'userGroups' => array(AttributeType::Mixed, 'label' => 'User group settings', 'default' => $userGroupOptions),
+          'controlPanel' => array(AttributeType::Number, 'label' => 'Show only in Control Panel', 'default' => 'true')
+      );
     }
 
     /**
